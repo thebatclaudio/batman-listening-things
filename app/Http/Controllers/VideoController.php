@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use FFMpeg\Coordinate\TimeCode;
 use FFMpeg\Filters\Audio\CustomFilter;
 use FFMpeg\Filters\Video\ClipFilter;
+use FFMpeg\Filters\Video\VideoFilters;
 use Illuminate\Http\Request;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use FFMpeg\Filters\Audio\SimpleFilter;
@@ -25,9 +26,9 @@ class VideoController extends Controller
         $videoDuration = $ffprobe->format(storage_path('app/batmanlistening.mp4'))->get('duration');
 
         $filename = "generated/batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".mp4";
-        $tempfilename =  "generated/tmp-batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".mp4";
+        $tempfilename = "generated/tmp-batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".mp4";
 
-        $ffmpeg = FFMpeg::open('batmanlistening.mp4');
+        $ffmpeg = FFMpeg::open(['batmanlistening.mp4', 'batmanlistening.mp4']);
 
         if ($audioDuration < $videoDuration) {
             $clipFilter = [
@@ -35,15 +36,14 @@ class VideoController extends Controller
                 "duration" => TimeCode::fromSeconds($audioDuration)
             ];
 
-            $ffmpeg->addFilter(new ClipFilter($clipFilter["start"], $clipFilter["duration"]))->export()
+            $ffmpeg = FFMpeg::open('batmanlistening.mp4')->addFilter(new ClipFilter($clipFilter["start"], $clipFilter["duration"]))->export()
                 ->inFormat(new \FFMpeg\Format\Video\X264)
                 ->save("temp-video.mp4");
         } else {
-            $loopTimes = (int)($audioDuration / $videoDuration) + 1;
+            $loopTimes = (int)($audioDuration/$videoDuration) + 1;
+            $inputFiles = array_fill(0, $loopTimes, 'batmanlistening.mp4');
 
-            $ffmpeg->addFilter(new CustomFilter("-stream_loop $loopTimes"))->export()
-                ->inFormat(new \FFMpeg\Format\Video\X264)
-                ->save($tempfilename);
+            $ffmpeg = FFMpeg::open($inputFiles)->export()->inFormat(new \FFMpeg\Format\Video\X264)->concatWithTranscoding(true, false)->save($tempfilename);
         }
 
         $ffmpeg = FFMpeg::open($tempfilename);
