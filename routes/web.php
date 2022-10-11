@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Telegram\Bot\Laravel\Facades\Telegram;
+use BotMan\BotMan\BotMan;
+use BotMan\BotMan\BotManFactory;
+use BotMan\BotMan\Drivers\DriverManager;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,12 +19,24 @@ use Telegram\Bot\Laravel\Facades\Telegram;
 Route::get('/', "App\Http\Controllers\VideoController@homepage");
 Route::post('/generate', "App\Http\Controllers\VideoController@generateBatmanVideo")->name("generate");
 
-Route::get('/test', function () {
-    $response = Telegram::getMe();
+Route::get("test", function () {
+    $config = [
+        "telegram" => [
+            "token" => env("TELEGRAM_BOT_TOKEN")
+        ]
+    ];
 
-    $botId = $response->getId();
-    $firstName = $response->getFirstName();
-    $username = $response->getUsername();
+// Load the driver(s) you want to use
+    DriverManager::loadDriver(\BotMan\Drivers\Telegram\TelegramDriver::class);
 
-    dd(compact("botId", "firstName", "username"));
+// Create an instance
+    $botman = BotManFactory::create($config);
+
+// Give the bot something to listen for.
+    $botman->hears('hello', function (BotMan $bot) {
+        $bot->reply('Hello yourself.');
+    });
+
+// Start listening
+    $botman->listen();
 });

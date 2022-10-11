@@ -6,8 +6,9 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "botman/botman": "^2.7",
+        "botman/driver-telegram": "^2.0",
         "guzzlehttp/guzzle": "^7.2",
-        "irazasyed/telegram-bot-sdk": "^3.9",
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
