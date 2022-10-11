@@ -19,7 +19,7 @@ use BotMan\BotMan\Drivers\DriverManager;
 Route::get('/', "App\Http\Controllers\VideoController@homepage");
 Route::post('/generate', "App\Http\Controllers\VideoController@generateBatmanVideo")->name("generate");
 
-Route::get("test", function () {
+Route::post("/listen", function () {
     $config = [
         "telegram" => [
             "token" => env("TELEGRAM_BOT_TOKEN")
