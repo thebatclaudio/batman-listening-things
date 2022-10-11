@@ -48,7 +48,7 @@ class VideoController extends Controller
 
             $ffmpeg = FFMpeg::open('batmanlistening.mp4')->addFilter(new ClipFilter($clipFilter["start"], $clipFilter["duration"]))->export()
                 ->inFormat(new \FFMpeg\Format\Video\X264)
-                ->save("temp-video.mp4");
+                ->save($tempfilename);
         } else {
             $loopTimes = (int)($audioDuration / $videoDuration) + 1;
             $inputFiles = array_fill(0, $loopTimes, 'batmanlistening.mp4');
