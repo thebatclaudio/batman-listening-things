@@ -35,7 +35,7 @@ class TelegramController extends Controller
                 $video = VideoController::generateBatmanVideo(storage_path("app/tmp-audio/$filename"));
 
                 // Create attachment
-                $attachment = new Video(null, $video);
+                $attachment = new Video($video);
 
                 // Build message object
                 $message = OutgoingMessage::create('Here it is')
