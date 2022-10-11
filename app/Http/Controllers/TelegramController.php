@@ -32,7 +32,7 @@ class TelegramController extends Controller
                 $filename = "tmp-audio-" . now()->timestamp . "-" . random_int(0, 999999) . ".ogg";
                 file_put_contents(storage_path("app/tmp-audio/$filename"), file_get_contents($url));
 
-                $video = VideoController::generateBatmanVideo(storage_path("app/tmp-audio/$filename"));
+                $video = VideoController::generateBatmanVideo(storage_path("app/tmp-audio/$filename"), true);
 
                 // Create attachment
                 $attachment = new Video($video);
