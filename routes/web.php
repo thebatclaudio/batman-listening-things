@@ -22,7 +22,7 @@ Route::post('/generate', "App\Http\Controllers\VideoController@generateBatmanVid
 Route::post("/listen", function () {
     $config = [
         "telegram" => [
-            "token" => env("TELEGRAM_BOT_TOKEN")
+            "token" => env("TELEGRAM_TOKEN")
         ]
     ];
 
