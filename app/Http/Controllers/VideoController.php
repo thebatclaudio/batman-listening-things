@@ -7,6 +7,7 @@ use FFMpeg\Filters\Audio\CustomFilter;
 use FFMpeg\Filters\Video\ClipFilter;
 use FFMpeg\Filters\Video\VideoFilters;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use FFMpeg\Filters\Audio\SimpleFilter;
 
@@ -17,10 +18,15 @@ class VideoController extends Controller
         return view("homepage");
     }
 
-    public function generateBatmanVideo(Request $request)
+    public function generateBatmanVideoFromRequest(Request $request)
     {
         $audioFile = $request->file("audio")->getRealPath();
 
+        return response()->download($this->generateBatmanVideo($audioFile));
+    }
+
+    public static function generateBatmanVideo(string $audioFile, bool $public_url = false)
+    {
         $ffprobe = \FFMpeg\FFProbe::create();
         $audioDuration = $ffprobe->format($audioFile)->get('duration');
         $videoDuration = $ffprobe->format(storage_path('app/batmanlistening.mp4'))->get('duration');
@@ -40,7 +46,7 @@ class VideoController extends Controller
                 ->inFormat(new \FFMpeg\Format\Video\X264)
                 ->save("temp-video.mp4");
         } else {
-            $loopTimes = (int)($audioDuration/$videoDuration) + 1;
+            $loopTimes = (int)($audioDuration / $videoDuration) + 1;
             $inputFiles = array_fill(0, $loopTimes, 'batmanlistening.mp4');
 
             $ffmpeg = FFMpeg::open($inputFiles)->export()->inFormat(new \FFMpeg\Format\Video\X264)->concatWithTranscoding(true, false)->save($tempfilename);
@@ -54,6 +60,10 @@ class VideoController extends Controller
             ->inFormat(new \FFMpeg\Format\Video\X264)
             ->save($filename);
 
-        return response()->download(storage_path("app/$filename"));
+        if($public_url) {
+            return Storage::temporaryUrl(storage_path("app/$filename"), now()->addDay());
+        }
+
+        return storage_path("app/$filename");
     }
 }
