@@ -34,6 +34,10 @@ class VideoController extends Controller
         $filename = "generated/batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".mp4";
         $tempfilename = "generated/tmp-batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".mp4";
 
+        if($public_url) {
+            $filename = "public/".$filename;
+        }
+
         $ffmpeg = FFMpeg::open(['batmanlistening.mp4', 'batmanlistening.mp4']);
 
         if ($audioDuration < $videoDuration) {
@@ -61,7 +65,7 @@ class VideoController extends Controller
             ->save($filename);
 
         if($public_url) {
-            return Storage::temporaryUrl(storage_path("app/$filename"), now()->addDay());
+            return Storage::url($filename);
         }
 
         return storage_path("app/$filename");
