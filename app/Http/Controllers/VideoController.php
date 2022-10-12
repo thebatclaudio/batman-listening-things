@@ -13,19 +13,19 @@ use FFMpeg\Filters\Audio\SimpleFilter;
 
 class VideoController extends Controller
 {
-    public function homepage()
+    public function homepage(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view("homepage");
     }
 
-    public function generateBatmanVideoFromRequest(Request $request)
+    public function generateBatmanVideoFromRequest(Request $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         $audioFile = $request->file("audio")->getRealPath();
 
         return response()->download($this->generateBatmanVideo($audioFile));
     }
 
-    public static function generateBatmanVideo(string $audioFile, bool $public_url = false)
+    public static function generateBatmanVideo(string $audioFile, bool $public_url = false): string
     {
         $ffprobe = \FFMpeg\FFProbe::create();
         $audioDuration = $ffprobe->format($audioFile)->get('duration');
@@ -38,31 +38,36 @@ class VideoController extends Controller
             $filename = "public/".$filename;
         }
 
-        $ffmpeg = FFMpeg::open(['batmanlistening.mp4', 'batmanlistening.mp4']);
-
+        // if audio duration > video duration then generate a loop video, otherwise clip video to audio duration
         if ($audioDuration < $videoDuration) {
             $clipFilter = [
                 "start" => TimeCode::fromSeconds(0),
                 "duration" => TimeCode::fromSeconds($audioDuration)
             ];
 
-            $ffmpeg = FFMpeg::open('batmanlistening.mp4')->addFilter(new ClipFilter($clipFilter["start"], $clipFilter["duration"]))->export()
+            FFMpeg::open('batmanlistening.mp4')->addFilter(new ClipFilter($clipFilter["start"], $clipFilter["duration"]))->export()
                 ->inFormat(new \FFMpeg\Format\Video\X264)
                 ->save($tempfilename);
         } else {
             $loopTimes = (int)($audioDuration / $videoDuration) + 1;
             $inputFiles = array_fill(0, $loopTimes, 'batmanlistening.mp4');
 
-            $ffmpeg = FFMpeg::open($inputFiles)->export()->inFormat(new \FFMpeg\Format\Video\X264)->concatWithTranscoding(true, false)->save($tempfilename);
+            FFMpeg::open($inputFiles)->export()
+                ->inFormat(new \FFMpeg\Format\Video\X264)
+                ->concatWithTranscoding(true, false)
+                ->save($tempfilename);
         }
 
+        // open temp generated file and apply audio on it
         $ffmpeg = FFMpeg::open($tempfilename);
-
         $ffmpeg
             ->addFilter(new SimpleFilter(["-i", $audioFile]))
             ->export()
             ->inFormat(new \FFMpeg\Format\Video\X264)
             ->save($filename);
+
+        // delete temp file
+        Storage::delete($tempfilename);
 
         if($public_url) {
             return Storage::url($filename);
