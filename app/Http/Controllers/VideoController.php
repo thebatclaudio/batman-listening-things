@@ -31,8 +31,8 @@ class VideoController extends Controller
         $audioDuration = $ffprobe->format($audioFile)->get('duration');
         $videoDuration = $ffprobe->format(storage_path('app/batmanlistening.mp4'))->get('duration');
 
-        $filename = "generated/batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".webm";
-        $tempfilename = "generated/tmp-batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".webm";
+        $filename = "generated/batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".mp4";
+        $tempfilename = "generated/tmp-batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".mp4";
 
         if($public_url) {
             $filename = "public/".$filename;
@@ -46,14 +46,14 @@ class VideoController extends Controller
             ];
 
             FFMpeg::open('batmanlistening.mp4')->addFilter(new ClipFilter($clipFilter["start"], $clipFilter["duration"]))->export()
-                ->inFormat(new \FFMpeg\Format\Video\WebM)
+                ->inFormat(new \FFMpeg\Format\Video\X264)
                 ->save($tempfilename);
         } else {
             $loopTimes = (int)($audioDuration / $videoDuration) + 1;
             $inputFiles = array_fill(0, $loopTimes, 'batmanlistening.mp4');
 
             FFMpeg::open($inputFiles)->export()
-                ->inFormat(new \FFMpeg\Format\Video\WebM)
+                ->inFormat(new \FFMpeg\Format\Video\X264)
                 ->concatWithTranscoding(true, false)
                 ->save($tempfilename);
         }
@@ -63,7 +63,7 @@ class VideoController extends Controller
         $ffmpeg
             ->addFilter(new SimpleFilter(["-i", $audioFile]))
             ->export()
-            ->inFormat(new \FFMpeg\Format\Video\WebM)
+            ->inFormat(new \FFMpeg\Format\Video\X264)
             ->save($filename);
 
         // delete temp file
