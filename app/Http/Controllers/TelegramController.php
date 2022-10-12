@@ -37,6 +37,8 @@ class TelegramController extends Controller
                 $exploded = explode(".", $url);
                 $extension = end($exploded);
 
+                if($extension === "oga") $extension = "ogg";
+
                 \Log::info("File extension: " . $extension);
 
                 $fileContent = file_get_contents($url);
