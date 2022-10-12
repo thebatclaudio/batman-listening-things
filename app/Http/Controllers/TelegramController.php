@@ -32,7 +32,7 @@ class TelegramController extends Controller
                 $url = $audio->getUrl(); // The original url
                 $fileContent = file_get_contents($url);
 
-                $audioSha256 = hash($fileContent, "sha256");
+                $audioSha256 = hash("sha256", $fileContent);
 
                 if ($generatedVideo = GeneratedVideo::withSha256($audioSha256)->first()) {
                     $generatedVideoFilename = $generatedVideo->generated_video_filename;
