@@ -63,7 +63,7 @@ class VideoController extends Controller
         $ffmpeg
             ->addFilter(new SimpleFilter(["-i", $audioFile]))
             ->export()
-            ->inFormat(new \FFMpeg\Format\Video\X264)
+            ->inFormat(new \FFMpeg\Format\Video\X264("aac", "libx265"))
             ->save($filename);
 
         // delete temp file
