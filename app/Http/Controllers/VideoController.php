@@ -53,7 +53,7 @@ class VideoController extends Controller
             $inputFiles = array_fill(0, $loopTimes, 'batmanlistening.mp4');
 
             FFMpeg::open($inputFiles)->export()
-                ->inFormat(new \FFMpeg\Format\Video\X264)
+                ->inFormat(new \FFMpeg\Format\Video\WebM)
                 ->concatWithTranscoding(true, false)
                 ->save($tempfilename);
         }
@@ -63,7 +63,7 @@ class VideoController extends Controller
         $ffmpeg
             ->addFilter(new SimpleFilter(["-i", $audioFile]))
             ->export()
-            ->inFormat(new \FFMpeg\Format\Video\X264)
+            ->inFormat(new \FFMpeg\Format\Video\WebM)
             ->save($filename);
 
         // delete temp file

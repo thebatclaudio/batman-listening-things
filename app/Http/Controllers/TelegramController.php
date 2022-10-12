@@ -27,6 +27,7 @@ class TelegramController extends Controller
         $bot = BotManFactory::create($config);
 
         $bot->receivesAudio(function ($bot, $audios) {
+            $bot->reply("Sending audio to Batman...");
 
             foreach ($audios as $audio) {
                 $url = $audio->getUrl(); // The original url
@@ -52,7 +53,7 @@ class TelegramController extends Controller
                 $attachment = new Video(env("APP_URL") . $generatedVideoFilename);
 
                 // Build message object
-                $message = OutgoingMessage::create('Here it is')
+                $message = OutgoingMessage::create('Batman is listening...')
                     ->withAttachment($attachment);
 
                 // Reply message object
