@@ -35,8 +35,8 @@ class VideoController extends Controller
         $filename = "generated/batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".mp4";
         $tempfilename = "generated/tmp-batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".mp4";
 
-        if($public_url) {
-            $filename = "public/".$filename;
+        if ($public_url) {
+            $filename = "public/" . $filename;
         }
 
         // if audio duration > video duration then generate a loop video, otherwise clip video to audio duration
@@ -67,10 +67,34 @@ class VideoController extends Controller
             ->inFormat(new X265)
             ->save($filename);
 
+        $filesize = filesize(storage_path("app/" . $filename));
+
+        $width = 500;
+        $height = 376;
+        while ($filesize > 10 * 1000 * 1000) {
+            \Log::info("Filesize: " . $filesize);
+            $width = $width / 2;
+            $height = $height / 2;
+
+            $filenameToResize = str_replace(".mp4", "-to-resize.mp4", $filename);
+            Storage::move($filename, $filenameToResize);
+
+            FFMpeg::open($filenameToResize)
+                ->resize($width, $height)
+                ->addFilter(new SimpleFilter(["-r", 5]))
+                ->export()
+                ->inFormat(new X265)
+                ->save($filename);
+
+            Storage::delete($filenameToResize);
+
+            $filesize = filesize(storage_path("app/" . $filename));
+        }
+
         // delete temp file
         Storage::delete($tempfilename);
 
-        if($public_url) {
+        if ($public_url) {
             return Storage::url($filename);
         }
 
