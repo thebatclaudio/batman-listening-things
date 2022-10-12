@@ -31,8 +31,14 @@ class TelegramController extends Controller
 
             foreach ($audios as $audio) {
                 $url = $audio->getUrl(); // The original url
+
+                \Log::info("File url: " . $url);
+
                 $exploded = explode(".", $url);
                 $extension = end($exploded);
+
+                \Log::info("File extension: " . $extension);
+
                 $fileContent = file_get_contents($url);
 
                 $audioSha256 = hash("sha256", $fileContent);
