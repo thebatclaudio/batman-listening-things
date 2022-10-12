@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\VideoFormats\X265;
 use FFMpeg\Coordinate\TimeCode;
 use FFMpeg\Filters\Audio\CustomFilter;
 use FFMpeg\Filters\Video\ClipFilter;
@@ -63,7 +64,7 @@ class VideoController extends Controller
         $ffmpeg
             ->addFilter(new SimpleFilter(["-i", $audioFile]))
             ->export()
-            ->inFormat(new \FFMpeg\Format\Video\X264("aac", "libx265"))
+            ->inFormat(new X265)
             ->save($filename);
 
         // delete temp file
