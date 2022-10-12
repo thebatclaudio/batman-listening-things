@@ -31,6 +31,8 @@ class TelegramController extends Controller
 
             foreach ($audios as $audio) {
                 $url = $audio->getUrl(); // The original url
+                $exploded = explode(".", $url);
+                $extension = end($exploded);
                 $fileContent = file_get_contents($url);
 
                 $audioSha256 = hash("sha256", $fileContent);
@@ -38,7 +40,7 @@ class TelegramController extends Controller
                 if ($generatedVideo = GeneratedVideo::withSha256($audioSha256)->first()) {
                     $generatedVideoFilename = $generatedVideo->generated_video_filename;
                 } else {
-                    $tmpFilename = "tmp-audio-" . now()->timestamp . "-" . random_int(0, 999999) . ".ogg";
+                    $tmpFilename = "tmp-audio-" . now()->timestamp . "-" . random_int(0, 999999) . "." . $extension;
                     file_put_contents(storage_path("app/tmp-audio/$tmpFilename"), $fileContent);
 
                     $generatedVideoFilename = VideoController::generateBatmanVideo(storage_path("app/tmp-audio/$tmpFilename"), true);
