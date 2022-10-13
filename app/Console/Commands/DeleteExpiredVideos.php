@@ -53,7 +53,6 @@ class DeleteExpiredVideos extends Command
      */
     public function handle()
     {
-        // Storage::delete("generated/batman-listening-1665684516-235985.mp4");
         $date = Carbon::now()->subHours($this->hours)->toDateTimeString();
         $this->hours = $this->argument('hours');
         if (!$this->hours) {
