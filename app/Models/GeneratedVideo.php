@@ -13,7 +13,7 @@ class GeneratedVideo extends Model
     protected $table = "generated_videos";
 
     protected $fillable = [
-        "audio_sha256", "generated_video_filename"
+        "audio_sha256", "generated_video_filename", "generated"
     ];
 
     public function scopeWithSha256(Builder $builder, string $sha256): Builder
