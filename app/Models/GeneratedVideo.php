@@ -13,11 +13,21 @@ class GeneratedVideo extends Model
     protected $table = "generated_videos";
 
     protected $fillable = [
-        "audio_sha256", "generated_video_filename"
+        "audio_sha256", "generated_video_filename", "generated"
     ];
 
     public function scopeWithSha256(Builder $builder, string $sha256): Builder
     {
         return $builder->where("audio_sha256", $sha256);
+    }
+
+    public function scopeGenerated(Builder $builder): Builder
+    {
+        return $builder->where("generated", true);
+    }
+
+    public function scopeNotGenerated(Builder $builder): Builder
+    {
+        return $builder->where("generated", false);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GeneratedVideo;
 use App\VideoFormats\X265;
 use FFMpeg\Coordinate\TimeCode;
 use FFMpeg\Filters\Audio\CustomFilter;
@@ -28,12 +29,25 @@ class VideoController extends Controller
 
     public static function generateBatmanVideo(string $audioFile, bool $public_url = false): string
     {
-        $ffprobe = \FFMpeg\FFProbe::create();
-        $audioDuration = $ffprobe->format($audioFile)->get('duration');
-        $videoDuration = $ffprobe->format(storage_path('app/batmanlistening.mp4'))->get('duration');
+        $audioSha256 = hash("sha256", file_get_contents($audioFile));
+
+        // check if a video with this audio was generated and return this
+        if ($generatedVideo = GeneratedVideo::withSha256($audioSha256)->generated()->first()) {
+            return $generatedVideo->generated_video_filename;
+        }
 
         $filename = "generated/batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".mp4";
         $tempfilename = "generated/tmp-batman-listening-" . now()->timestamp . "-" . random_int(0, 999999) . ".mp4";
+
+        $generatedVideo = GeneratedVideo::create([
+            "audio_sha256" => $audioSha256,
+            "generated_video_filename" => $filename
+        ]);
+
+        // get audio and video duration
+        $ffprobe = \FFMpeg\FFProbe::create();
+        $audioDuration = $ffprobe->format($audioFile)->get('duration');
+        $videoDuration = $ffprobe->format(storage_path('app/batmanlistening.mp4'))->get('duration');
 
         if ($public_url) {
             $filename = "public/" . $filename;
@@ -67,12 +81,13 @@ class VideoController extends Controller
             ->inFormat(new X265)
             ->save($filename);
 
+
+        // if file is too big try to resize it
         $filesize = filesize(storage_path("app/" . $filename));
 
         $width = 500;
         $height = 376;
         while ($filesize > 10 * 1000 * 1000) {
-            \Log::info("Filesize: " . $filesize);
             $width = $width / 2;
             $height = $height / 2;
 
@@ -93,6 +108,11 @@ class VideoController extends Controller
 
         // delete temp file
         Storage::delete($tempfilename);
+
+        // update generated video record
+        $generatedVideo->update([
+            "generated" => true
+        ]);
 
         if ($public_url) {
             return Storage::url($filename);
