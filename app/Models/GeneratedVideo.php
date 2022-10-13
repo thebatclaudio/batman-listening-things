@@ -20,4 +20,14 @@ class GeneratedVideo extends Model
     {
         return $builder->where("audio_sha256", $sha256);
     }
+
+    public function scopeGenerated(Builder $builder): Builder
+    {
+        return $builder->where("generated", true);
+    }
+
+    public function scopeNotGenerated(Builder $builder): Builder
+    {
+        return $builder->where("generated", false);
+    }
 }
