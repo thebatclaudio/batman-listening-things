@@ -121,6 +121,10 @@ return [
     |
     */
 
+    'videos' => [
+      'lifetime' => env('VIDEOS_LIFETIME', 24) // as hours
+    ],
+
     'key' => env('APP_KEY'),
 
     'cipher' => 'AES-256-CBC',
