@@ -29,7 +29,6 @@ class DeleteExpiredVideos extends Command
      * Find list of expired videos
      */
     private function getVideos($date) {
-      // 24th will not be included for delete list
       return GeneratedVideo::where('created_at', '>', $date);
     }
 
