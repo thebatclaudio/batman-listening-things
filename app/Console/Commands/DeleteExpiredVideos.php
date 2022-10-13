@@ -14,7 +14,7 @@ class DeleteExpiredVideos extends Command
      *
      * @var string
      */
-    protected $signature = 'videos:delete {hours} {prefix?}';
+    protected $signature = 'videos:delete {hours?} {prefix?}';
 
     private $hours;
 
